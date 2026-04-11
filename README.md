@@ -69,6 +69,7 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 >         - - **BlackjackDuck's tile generator** generates grid panels, not accessories — use for geometry reference only.
 >           - - **David D's Multiconnect Thread Docs PDF** is the ground truth for channel dimensions — download it first.
 >             - - **MakerWorld parametric maker** workflow: Code button -> Cmd+A -> paste -> Save -> close -> Generate -> wait 15s -> inspect -> Download 3MF.
+>             - - **Gravity is your enemy with drop-in designs** — a U-cradle with an open bottom faces the floor under a desk. The laptop falls straight out. Use slide-in C-channel rails so the laptop enters horizontally and gravity pushes it onto the lips, not out of the holder.
 >              
 >               - ---
 >
@@ -125,17 +126,18 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 >
 > ## 📋 Device Catalogue
 >
-> ### Mount 1 — MacBook Air M2 ✅ PRINTED (v1)
+> ### Mount 1 — MacBook Air M2 🔄 REDESIGNED (slide-in v1)
 > | Field | Value |
 > |---|---|
 > | Dimensions | 304.1 x 215.0 x 11.3 mm |
-> | Mount type | U-shape: back_rail + 2x side_arm |
-> | Orientation | Slides front-to-back, drops from above |
-> | Drop distance | 11.3 + 1 + 8 = 20.3mm |
-> | Snap count | ~13 (11 back + 1 per arm) |
-> | SCAD file | mba-m2-cradle.scad |
-> | Status | v1 printed — awaiting fit test |
-> | Notes | Back rail is ~312mm — orient diagonally on P2S bed |
+> | Mount type | **Slide-in C-channel rails** (2 identical rails, flipped for L/R) |
+> | Orientation | Slides front-to-back horizontally; gravity holds laptop onto lips |
+> | Channel height | 11.3 + 3 = 14.3mm (laptop + clearance) |
+> | Snap count | ~12 (6 channels per rail × 2 rails) |
+> | SCAD file | mba-m2-slide-rail.scad |
+> | Status | v1 designed — ready to print |
+> | Notes | Each rail is 38×180mm, fits flat on P2S. Print 2 copies, flip one. Space rails ~11 grid holes apart (308mm). |
+> | Previous | mba-m2-cradle.scad (drop-in U-shape, retired — laptop fell out due to gravity) |
 >
 > ### Mount 2 — Dell Pro 14 Plus PB14250 ⚪ READY TO DESIGN
 > | Field | Value |
@@ -199,7 +201,8 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 > | File | Description |
 > |---|---|
 > | README.md | This skill doc + catalogue |
-> | mba-m2-cradle.scad | MacBook Air M2 cradle (back_rail + side_arm) |
+> | mba-m2-slide-rail.scad | MacBook Air M2 slide-in rail holder (print 2, flip one) |
+> | mba-m2-cradle.scad | MacBook Air M2 drop-in cradle (retired — gravity defeated it) |
 >
 > ## How to Resume with Claude
 >
