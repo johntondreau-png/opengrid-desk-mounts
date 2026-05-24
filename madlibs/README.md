@@ -13,7 +13,7 @@ npm run dev
 
 Open http://localhost:3000.
 
-Locally the room store falls back to an in-memory `Map` (single Node process) so you don't need Redis. To exercise the real Vercel + Redis path locally, set `KV_REST_API_URL` and `KV_REST_API_TOKEN` in `.env.local`.
+Locally the room store falls back to an in-memory `Map` (single Node process) so you don't need a database. To exercise the real Vercel + Neon path locally, set `DATABASE_URL` in `.env.local` to a pooled Neon connection string.
 
 ## How it works
 
@@ -30,17 +30,17 @@ Locally the room store falls back to an in-memory `Map` (single Node process) so
 1. Push the branch to GitHub if you haven't already.
 2. In Vercel, **Add New → Project**, import the repo.
 3. **Root directory:** `madlibs`. Vercel autodetects Next.js.
-4. **Storage → Upstash Redis (Marketplace) → Connect.** This provisions a free Upstash database and injects `KV_REST_API_URL` and `KV_REST_API_TOKEN` as env vars on every deploy automatically.
+4. **Storage → Neon (Marketplace) → Connect**, or set `DATABASE_URL` manually to a pooled Neon connection string. This is what makes rooms persist across serverless invocations.
 5. **Environment Variables:** add `ANTHROPIC_API_KEY` (your Claude API key).
 6. Deploy.
 
-The store auto-detects the Upstash env vars and switches from in-memory to Redis. No code change needed.
+The store auto-detects `DATABASE_URL` and switches from in-memory to Neon Postgres. The `madlibs_rooms` table is created on first use (idempotent `CREATE TABLE IF NOT EXISTS`).
 
 ## Stack
 
 - Next.js 14 (App Router) + TypeScript + Tailwind
 - `@anthropic-ai/sdk` for the Claude calls (default: `claude-opus-4-7`, configurable via `ANTHROPIC_MODEL`)
-- `@upstash/redis` for cross-instance room state on Vercel; in-memory fallback for local dev
+- `@neondatabase/serverless` for cross-instance room state on Vercel; in-memory fallback for local dev
 - Polling every 2s from the client for state sync
 
 ## Known v1 trade-offs

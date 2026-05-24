@@ -1,5 +1,8 @@
-import { Redis } from "@upstash/redis";
+import { neon, neonConfig } from "@neondatabase/serverless";
 import type { Room, SpiceLevel, Theme } from "./types";
+
+// Use fetch-based HTTP transport (works in any runtime, no connection pool).
+neonConfig.fetchConnectionCache = true;
 
 const TTL_SECONDS = 60 * 60 * 6; // 6 hours
 
@@ -14,7 +17,7 @@ interface Backend {
 }
 
 /**
- * In-memory backend for local dev when no Redis is configured.
+ * In-memory backend for local dev when no DATABASE_URL is configured.
  * Pinned to globalThis so it survives Next.js dev-mode module reloads.
  */
 function memoryBackend(): Backend {
@@ -33,34 +36,7 @@ function memoryBackend(): Backend {
     async reserveCode(generate) {
       for (let i = 0; i < 50; i++) {
         const code = generate();
-        if (!rooms.has(code)) {
-          // Reserve with an empty placeholder so concurrent reservations don't collide.
-          // Real room is written by createRoom shortly after.
-          return code;
-        }
-      }
-      throw new Error("Could not allocate a room code");
-    },
-  };
-}
-
-function redisBackend(redis: Redis): Backend {
-  return {
-    async get(code) {
-      const raw = await redis.get<Room | string>(`room:${code}`);
-      if (raw == null) return null;
-      // Upstash auto-deserializes JSON; defensively handle the string case too.
-      return typeof raw === "string" ? (JSON.parse(raw) as Room) : raw;
-    },
-    async set(code, room) {
-      await redis.set(`room:${code}`, JSON.stringify(room), { ex: TTL_SECONDS });
-    },
-    async reserveCode(generate) {
-      for (let i = 0; i < 50; i++) {
-        const code = generate();
-        // SET NX with short TTL on a reservation key; createRoom overwrites with the real value.
-        const ok = await redis.set(`room:${code}`, "{}", { nx: true, ex: 30 });
-        if (ok) return code;
+        if (!rooms.has(code)) return code;
       }
       throw new Error("Could not allocate a room code");
     },
@@ -74,15 +50,89 @@ function gc(rooms: Map<string, Room>) {
   }
 }
 
+/**
+ * Neon Postgres backend. Schema is created on first use (idempotent).
+ */
+function neonBackend(connectionString: string): Backend {
+  const sql = neon(connectionString);
+
+  let initialized: Promise<void> | null = null;
+  function init(): Promise<void> {
+    if (!initialized) {
+      initialized = (async () => {
+        await sql`
+          CREATE TABLE IF NOT EXISTS madlibs_rooms (
+            code TEXT PRIMARY KEY,
+            data JSONB NOT NULL,
+            expires_at TIMESTAMPTZ NOT NULL
+          )
+        `;
+        await sql`
+          CREATE INDEX IF NOT EXISTS madlibs_rooms_expires_at_idx
+          ON madlibs_rooms (expires_at)
+        `;
+      })().catch((err) => {
+        // Allow retry on next call if init failed
+        initialized = null;
+        throw err;
+      });
+    }
+    return initialized;
+  }
+
+  return {
+    async get(code) {
+      await init();
+      const rows = (await sql`
+        SELECT data FROM madlibs_rooms
+        WHERE code = ${code} AND expires_at > now()
+      `) as Array<{ data: Room }>;
+      return rows[0]?.data ?? null;
+    },
+    async set(code, room) {
+      await init();
+      const expiresAt = new Date(Date.now() + TTL_SECONDS * 1000).toISOString();
+      await sql`
+        INSERT INTO madlibs_rooms (code, data, expires_at)
+        VALUES (${code}, ${JSON.stringify(room)}::jsonb, ${expiresAt})
+        ON CONFLICT (code) DO UPDATE
+          SET data = EXCLUDED.data, expires_at = EXCLUDED.expires_at
+      `;
+    },
+    async reserveCode(generate) {
+      await init();
+      for (let i = 0; i < 50; i++) {
+        const code = generate();
+        // Insert a placeholder row; if the code is already taken (PK conflict
+        // OR an unexpired row exists), try again.
+        const placeholder = { _reserved: true };
+        const expiresAt = new Date(Date.now() + 30 * 1000).toISOString();
+        const result = (await sql`
+          INSERT INTO madlibs_rooms (code, data, expires_at)
+          VALUES (${code}, ${JSON.stringify(placeholder)}::jsonb, ${expiresAt})
+          ON CONFLICT (code) DO UPDATE
+            SET data = EXCLUDED.data, expires_at = EXCLUDED.expires_at
+            WHERE madlibs_rooms.expires_at <= now()
+          RETURNING code
+        `) as Array<{ code: string }>;
+        if (result.length > 0) return code;
+      }
+      throw new Error("Could not allocate a room code");
+    },
+  };
+}
+
 let _backend: Backend | null = null;
 function backend(): Backend {
   if (_backend) return _backend;
-  // Upstash sets KV_REST_API_URL/TOKEN automatically on Vercel via the marketplace integration.
-  // Also accept UPSTASH_REDIS_REST_URL/TOKEN for non-Vercel use.
-  const url = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
-  if (url && token) {
-    _backend = redisBackend(new Redis({ url, token }));
+  // Vercel-Neon integration sets DATABASE_URL automatically; also accept
+  // POSTGRES_URL (Vercel's generic alias) and NEON_DATABASE_URL.
+  const url =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.NEON_DATABASE_URL;
+  if (url) {
+    _backend = neonBackend(url);
   } else {
     _backend = memoryBackend();
   }
@@ -135,7 +185,7 @@ export async function createRoom(opts: {
 export async function getRoom(code: string): Promise<Room | undefined> {
   const normalized = code.toUpperCase();
   const room = await backend().get(normalized);
-  if (!room || !room.code) return undefined; // placeholder reservation
+  if (!room || !room.code) return undefined; // skip reservation placeholders
   return room;
 }
 
