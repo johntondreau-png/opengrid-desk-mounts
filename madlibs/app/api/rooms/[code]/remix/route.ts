@@ -7,7 +7,7 @@ export const maxDuration = 60;
 
 export async function POST(req: Request, { params }: { params: { code: string } }) {
   const { youId, twist } = (await req.json()) as { youId: string; twist: string };
-  const room = getRoom(params.code);
+  const room = await getRoom(params.code);
   if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
   if (room.hostId !== youId) {
     return NextResponse.json({ error: "Only the host can remix" }, { status: 403 });
@@ -19,7 +19,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     return NextResponse.json({ error: "Twist required" }, { status: 400 });
   }
 
-  updateRoom(params.code, (r) => {
+  await updateRoom(params.code, (r) => {
     r.phase = "generating";
     r.error = null;
   });
@@ -33,17 +33,17 @@ export async function POST(req: Request, { params }: { params: { code: string } 
       players: room.players,
       submissions: room.submissions,
     });
-    const updated = updateRoom(params.code, (r) => {
+    const updated = await updateRoom(params.code, (r) => {
       r.remixes.push(remixed);
       r.phase = "story";
     });
     return NextResponse.json({ room: updated });
   } catch (err) {
     const msg = err instanceof Error ? err.message : "Unknown error";
-    updateRoom(params.code, (r) => {
+    const reverted = await updateRoom(params.code, (r) => {
       r.phase = "story";
       r.error = `Couldn't remix: ${msg}`;
     });
-    return NextResponse.json({ error: msg }, { status: 500 });
+    return NextResponse.json({ room: reverted, error: msg }, { status: 500 });
   }
 }

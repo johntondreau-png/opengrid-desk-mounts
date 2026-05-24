@@ -4,7 +4,7 @@ import { getRoom } from "@/lib/store";
 export const dynamic = "force-dynamic";
 
 export async function GET(_req: Request, { params }: { params: { code: string } }) {
-  const room = getRoom(params.code);
+  const room = await getRoom(params.code);
   if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
   return NextResponse.json({ room });
 }

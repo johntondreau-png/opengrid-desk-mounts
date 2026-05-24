@@ -16,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Name required" }, { status: 400 });
   }
   const hostId = crypto.randomUUID();
-  const room = createRoom({
+  const room = await createRoom({
     hostId,
     hostName: hostName.trim().slice(0, 40),
     spice,
