@@ -12,7 +12,7 @@ export async function POST(req: Request, { params }: { params: { code: string } 
     word: string;
   };
 
-  const room = getRoom(params.code);
+  const room = await getRoom(params.code);
   if (!room) return NextResponse.json({ error: "Room not found" }, { status: 404 });
   if (room.phase !== "writing") {
     return NextResponse.json({ error: "Not accepting submissions right now" }, { status: 409 });
@@ -26,47 +26,44 @@ export async function POST(req: Request, { params }: { params: { code: string } 
   const trimmed = word.trim().slice(0, 80);
   if (!trimmed) return NextResponse.json({ error: "Word required" }, { status: 400 });
 
-  updateRoom(params.code, (r) => {
+  const afterSubmit = await updateRoom(params.code, (r) => {
     const existing = r.submissions.findIndex((s) => s.slotIndex === slotIndex);
     const entry = { slotIndex, playerId: youId, word: trimmed, submittedAt: Date.now() };
     if (existing >= 0) r.submissions[existing] = entry;
     else r.submissions.push(entry);
   });
 
-  // If all slots are filled, kick off story assembly.
-  const after = getRoom(params.code);
-  if (after && after.submissions.length === after.slots.length && after.phase === "writing") {
-    updateRoom(params.code, (r) => {
+  // If this submission filled the last blank, assemble the story inline.
+  // The caller waits 10-30s; other players see "generating" via polling.
+  if (afterSubmit && afterSubmit.submissions.length === afterSubmit.slots.length) {
+    await updateRoom(params.code, (r) => {
       r.phase = "generating";
       r.error = null;
     });
-
-    // Don't await — assemble in the background so the submit response returns fast.
-    // The client will poll and see phase flip to "story" when ready.
-    (async () => {
-      try {
-        const story = await assembleStory({
-          spice: after.spice,
-          theme: after.theme,
-          title: after.title!,
-          template: after.template!,
-          submissions: after.submissions
-            .slice()
-            .sort((a, b) => a.slotIndex - b.slotIndex),
-        });
-        updateRoom(params.code, (r) => {
-          r.story = story;
-          r.phase = "story";
-        });
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : "Unknown error";
-        updateRoom(params.code, (r) => {
-          r.phase = "writing";
-          r.error = `Couldn't assemble the story: ${msg}`;
-        });
-      }
-    })();
+    try {
+      const story = await assembleStory({
+        spice: afterSubmit.spice,
+        theme: afterSubmit.theme,
+        title: afterSubmit.title!,
+        template: afterSubmit.template!,
+        submissions: afterSubmit.submissions
+          .slice()
+          .sort((a, b) => a.slotIndex - b.slotIndex),
+      });
+      const final = await updateRoom(params.code, (r) => {
+        r.story = story;
+        r.phase = "story";
+      });
+      return NextResponse.json({ room: final });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown error";
+      const reverted = await updateRoom(params.code, (r) => {
+        r.phase = "writing";
+        r.error = `Couldn't assemble the story: ${msg}`;
+      });
+      return NextResponse.json({ room: reverted, error: msg }, { status: 500 });
+    }
   }
 
-  return NextResponse.json({ room: getRoom(params.code) });
+  return NextResponse.json({ room: afterSubmit });
 }
