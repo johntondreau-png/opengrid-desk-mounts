@@ -1,8 +1,5 @@
-import { neon, neonConfig } from "@neondatabase/serverless";
+import { neon } from "@neondatabase/serverless";
 import type { Room, SpiceLevel, Theme } from "./types";
-
-// Use fetch-based HTTP transport (works in any runtime, no connection pool).
-neonConfig.fetchConnectionCache = true;
 
 const TTL_SECONDS = 60 * 60 * 6; // 6 hours
 
@@ -54,7 +51,13 @@ function gc(rooms: Map<string, Room>) {
  * Neon Postgres backend. Schema is created on first use (idempotent).
  */
 function neonBackend(connectionString: string): Backend {
-  const sql = neon(connectionString);
+  // CRITICAL: opt out of Next.js's fetch() data cache. Neon's serverless driver
+  // makes its queries via fetch(), and the App Router caches fetch responses by
+  // default — even with `dynamic = "force-dynamic"` on the route handler. Without
+  // this, the first GET response for a room is frozen and served forever.
+  const sql = neon(connectionString, {
+    fetchOptions: { cache: "no-store" },
+  });
 
   let initialized: Promise<void> | null = null;
   function init(): Promise<void> {
