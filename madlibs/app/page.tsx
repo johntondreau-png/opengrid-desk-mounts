@@ -32,7 +32,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to create room");
-      sessionStorage.setItem(`madlibs:you:${data.room.code}`, JSON.stringify(data.you));
+      localStorage.setItem(`madlibs:you:${data.room.code}`, JSON.stringify(data.you));
       router.push(`/r/${data.room.code}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -53,7 +53,7 @@ export default function Home() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to join");
-      sessionStorage.setItem(`madlibs:you:${code}`, JSON.stringify(data.you));
+      localStorage.setItem(`madlibs:you:${code}`, JSON.stringify(data.you));
       router.push(`/r/${code}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");

@@ -28,11 +28,21 @@ export default function RoomPage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const lastVersion = useRef<number>(-1);
 
-  // Load "you" from sessionStorage on mount
+  // Load "you" from localStorage on mount
   useEffect(() => {
-    const raw = sessionStorage.getItem(`madlibs:you:${code}`);
+    const raw = localStorage.getItem(`madlibs:you:${code}`);
     if (raw) setYou(JSON.parse(raw));
   }, [code]);
+
+  // If our stored identity isn't in the room's player list (e.g. room expired
+  // and a new one took the code, or local data is stale), clear and re-prompt.
+  useEffect(() => {
+    if (!room || !you) return;
+    if (!room.players.some((p) => p.id === you.id)) {
+      localStorage.removeItem(`madlibs:you:${code}`);
+      setYou(null);
+    }
+  }, [room, you, code]);
 
   // Polling loop
   const refresh = useCallback(async () => {
@@ -135,7 +145,7 @@ function JoinPrompt({ code, onJoined }: { code: string; onJoined: (you: You) => 
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to join");
-      sessionStorage.setItem(`madlibs:you:${code}`, JSON.stringify(data.you));
+      localStorage.setItem(`madlibs:you:${code}`, JSON.stringify(data.you));
       onJoined(data.you);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
@@ -183,7 +193,9 @@ function Lobby({
 }) {
   const [busy, setBusy] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [startError, setStartError] = useState<string | null>(null);
 
+  const host = room.players.find((p) => p.id === room.hostId);
   const joinUrl = typeof window !== "undefined" ? `${window.location.origin}/r/${room.code}` : "";
 
   async function copy() {
@@ -194,13 +206,20 @@ function Lobby({
 
   async function start() {
     setBusy(true);
+    setStartError(null);
     try {
-      await fetch(`/api/rooms/${room.code}/start`, {
+      const res = await fetch(`/api/rooms/${room.code}/start`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ youId: you.id }),
       });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || `Server error (${res.status})`);
+      }
       onChange();
+    } catch (err) {
+      setStartError(err instanceof Error ? err.message : "Network error");
     } finally {
       setBusy(false);
     }
@@ -239,12 +258,22 @@ function Lobby({
       </section>
 
       {isHost ? (
-        <button onClick={start} className="btn-primary w-full" disabled={busy || room.players.length < 1}>
-          {busy ? "Generating story…" : "Start the game"}
-        </button>
+        <div className="space-y-2">
+          {room.players.length === 1 && (
+            <p className="text-center text-sm text-ink/50">
+              Solo so far — share the link above. You can start anyway (6 blanks, all yours), or wait for friends.
+            </p>
+          )}
+          <button onClick={start} className="btn-primary w-full" disabled={busy}>
+            {busy ? "Generating story…" : `Start the game (${room.players.length} player${room.players.length === 1 ? "" : "s"})`}
+          </button>
+          {startError && (
+            <div className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{startError}</div>
+          )}
+        </div>
       ) : (
         <div className="rounded-2xl bg-white/40 p-6 text-center text-ink/60">
-          Waiting for the host to start…
+          Waiting for <span className="font-medium text-ink">{host?.name || "the host"}</span> to start…
         </div>
       )}
     </div>
