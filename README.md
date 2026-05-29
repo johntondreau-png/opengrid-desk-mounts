@@ -137,15 +137,17 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 > | Status | v1 printed — awaiting fit test |
 > | Notes | Back rail is ~312mm — orient diagonally on P2S bed |
 >
-> ### Mount 2 — Dell Pro 14 Plus PB14250 ⚪ READY TO DESIGN
+> ### Mount 2 — Dell Pro 14 Plus PB14250 🟢 v1 DESIGNED
 > | Field | Value |
 > |---|---|
 > | Dimensions | 313.5 x 224.0 x 20.2 mm (max) |
-> | Mount type | Same U-shape as MBA |
-> | Drop distance | 20.2 + 1 + 8 = 29.2mm |
-> | Snap count | ~15 |
-> | Notes | Back rail 313mm — likely needs splitting into 2 pieces for P2S |
-> | Status | Just change laptop_w/d/h params in mba-m2-cradle.scad |
+> | Mount type | 4 independent corner brackets (rear_left, rear_right, front_left, front_right) |
+> | Orientation | Slides in horizontally from the FRONT; rear back-walls stop it; front detents retain it |
+> | Drop distance | 2 (top gap) + 20.2 + 0.6 (shelf gap) + 4 (shelf) = 26.8mm |
+> | Snap count | ~8 (1–2 per bracket × 4 brackets) |
+> | SCAD file | dell-pb14250-cradle.scad |
+> | Status | v1 written — awaiting first print + fit test |
+> | Notes | Channels run along X (width). 224mm depth = exactly 8 grid cells, so front/rear brackets both land on real grid rows; X-running channels absorb the non-grid 313.5mm width. Every part <70mm — P2S bed is no longer a concern. |
 >
 > ### Mount 3 — Plugable UD-3900PDZ Docking Station ⚪ READY TO DESIGN
 > | Field | Value |
@@ -183,14 +185,14 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 > | Mount | Snaps |
 > |---|---|
 > | MBA M2 | 13 |
-> | Dell PB14250 | 15 |
+> | Dell PB14250 | 8 |
 > | Plugable dock | 8 |
 > | Power brick | 4 |
 > | eero 6 | 6 |
 > | Monster strip | 8 |
-> | **TOTAL** | **~54** |
+> | **TOTAL** | **~47** |
 >
-> **Print 60 Multiconnect lite snaps** for full coverage + spares.
+> **Print 55 Multiconnect lite snaps** for full coverage + spares.
 >
 > ---
 >
@@ -200,6 +202,7 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 > |---|---|
 > | README.md | This skill doc + catalogue |
 > | mba-m2-cradle.scad | MacBook Air M2 cradle (back_rail + side_arm) |
+> | dell-pb14250-cradle.scad | Dell Pro 14 Plus cradle (4 corner brackets, front-slide) |
 >
 > ## How to Resume with Claude
 >
