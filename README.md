@@ -194,12 +194,61 @@ OpenSCAD parametric under-desk mounts for the [OpenGrid system](https://makerwor
 >
 > ---
 >
+> ## 🧱 Gridfinity (42mm) — separate system
+>
+> **Heads up:** *Gridfinity* (42mm bins + baseplates, spec by Zack Freedman) is a
+> **different** system from the *OpenGrid* (28mm wall-mount) work above. They are
+> not interchangeable — different grid pitch, different connectors. The Gridfinity
+> generator lives in `gridfinity.scad`.
+>
+> ### Spec (canonical)
+>
+> | Property | Value |
+> |---|---|
+> | Grid pitch (X/Y) | 42.0 mm |
+> | Height unit (Z) | 7.0 mm |
+> | Clearance | 0.25mm per side (0.5 total) → body 41.5mm/cell |
+> | Base "foot" profile (top→bottom) | 2.15mm chamfer / 1.80mm vertical / 0.80mm chamfer = 4.75mm |
+> | Outer corner radius | 3.75mm (top), 0.8mm (foot bottom) |
+>
+> ### Usage
+>
+> `gridfinity.scad` is one parametric file with a `part` selector, same convention as `mba-m2-cradle.scad`.
+>
+> ```bash
+> # A 2x1, 3-unit-tall bin with stacking lip
+> openscad -o bin.stl -D 'part="bin"' -D gx=2 -D gy=1 -D gh=3 gridfinity.scad
+>
+> # Same footprint split into a 3x2 grid of compartments
+> openscad -o tray.stl -D 'part="bin"' -D divx=2 -D divy=1 gridfinity.scad
+>
+> # A 2x2 baseplate the bins drop into
+> openscad -o baseplate.stl -D 'part="baseplate"' -D gx=2 -D gy=2 gridfinity.scad
+> ```
+>
+> Or open it in the OpenSCAD GUI and use the Customizer (params grouped: What to render / Grid Size / Bin Options / Baseplate Options / Quality).
+>
+> **Key params:** `part` (bin|baseplate), `gx`/`gy` (footprint units), `gh` (height units, bins only), `wall`, `floor_th`, `stacking_lip`, `divx`/`divy` (dividers), `bp_floor`. Footprints are exact multiples of 42mm minus clearance (a 2×1×3 bin body = 83.5 × 41.5 × 21mm).
+>
+> ### Status
+>
+> | Part | Status |
+> |---|---|
+> | Parametric bin (size, height, walls, floor) | ✅ renders, manifold-verified |
+> | Compartment dividers (`divx`/`divy`) | ✅ |
+> | Stacking lip | ✅ funnel that nests stacked feet |
+> | Baseplate (drop-in foot pockets, tiles seamlessly) | ✅ |
+> | Magnet/screw holes, label tabs, finger scoops | ⚪ future work |
+>
+> ---
+>
 > ## Files in This Repo
 >
 > | File | Description |
 > |---|---|
 > | README.md | This skill doc + catalogue |
-> | mba-m2-cradle.scad | MacBook Air M2 cradle (back_rail + side_arm) |
+> | mba-m2-cradle.scad | OpenGrid (28mm) MacBook Air M2 cradle (back_rail + side_arm) |
+> | gridfinity.scad | Gridfinity (42mm) parametric bin + baseplate generator |
 >
 > ## How to Resume with Claude
 >
