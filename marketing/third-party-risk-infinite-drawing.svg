@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1700 1120" width="1700" height="1120" font-family="'Bradley Hand','Segoe Print','Comic Sans MS','Marker Felt',cursive">
+  <defs>
+    <radialGradient id="paper" cx="50%" cy="36%" r="85%">
+      <stop offset="0%" stop-color="#fdfdfb"/>
+      <stop offset="100%" stop-color="#eeede6"/>
+    </radialGradient>
+    <linearGradient id="loopInk" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0f4c81"/>
+      <stop offset="100%" stop-color="#1b8a8f"/>
+    </linearGradient>
+    <filter id="rough">
+      <feTurbulence type="fractalNoise" baseFrequency="0.012" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="roughHeavy">
+      <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="3" dy="5" stdDeviation="4" flood-color="#1a1a1a" flood-opacity="0.16"/>
+    </filter>
+    <pattern id="dots" width="46" height="46" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="2.1" fill="#d2d0c6" opacity="0.55"/>
+    </pattern>
+  </defs>
+
+  <rect width="1700" height="1120" fill="url(#paper)"/>
+  <rect width="1700" height="1120" fill="url(#dots)"/>
+
+  <!-- ===================== HEADER ===================== -->
+  <g filter="url(#rough)">
+    <text x="80" y="98" font-size="50" fill="#0f4c81" font-weight="bold">Third-Party Risk: every angle</text>
+    <text x="82" y="146" font-size="29" fill="#1b8a8f">one vendor &#8594; many kinds of risk &#8594; one continuous program</text>
+  </g>
+  <path d="M78 112 q 360 20 720 4" stroke="#f2a900" stroke-width="7" fill="none" stroke-linecap="round" filter="url(#roughHeavy)"/>
+
+  <!-- ===================== CENTER: THE INFINITE LIFECYCLE LOOP ===================== -->
+  <g transform="translate(40 40)">
+    <g filter="url(#rough)" opacity="0.95">
+      <path d="M 600 600
+               C 500 460, 720 450, 800 590
+               C 880 730, 1090 720, 1120 590
+               C 1150 460, 940 450, 860 590
+               C 780 730, 700 740, 600 600 Z"
+            fill="none" stroke="url(#loopInk)" stroke-width="11" stroke-linecap="round" opacity="0.4"/>
+    </g>
+    <!-- infinity glyph -->
+    <text x="790" y="610" font-size="120" fill="#f2a900" opacity="0.85" font-family="Arial, sans-serif" font-weight="bold" filter="url(#rough)">&#8734;</text>
+
+    <!-- direction arrows -->
+    <g fill="#0f4c81" filter="url(#rough)">
+      <path d="M795 470 l 26 -6 l -13 24 z"/>
+      <path d="M1108 530 l 9 25 l -26 -8 z"/>
+      <path d="M865 730 l -26 6 l 13 -24 z"/>
+      <path d="M598 648 l -9 -26 l 26 8 z"/>
+    </g>
+
+    <!-- lifecycle micro-nodes around loop -->
+    <g font-size="22" font-weight="bold">
+      <g filter="url(#softShadow)"><rect x="520" y="500" width="150" height="56" rx="14" fill="#fff" stroke="#0f4c81" stroke-width="3" filter="url(#rough)"/><text x="540" y="535" fill="#0f4c81">Onboard</text></g>
+      <g filter="url(#softShadow)"><rect x="745" y="455" width="150" height="56" rx="14" fill="#fff" stroke="#1b8a8f" stroke-width="3" filter="url(#rough)"/><text x="770" y="490" fill="#1b8a8f">Assess</text></g>
+      <g filter="url(#softShadow)"><rect x="1055" y="500" width="150" height="56" rx="14" fill="#fff" stroke="#0f4c81" stroke-width="3" filter="url(#rough)"/><text x="1082" y="535" fill="#0f4c81">Score</text></g>
+      <g filter="url(#softShadow)"><rect x="1055" y="640" width="150" height="56" rx="14" fill="#fff" stroke="#1b8a8f" stroke-width="3" filter="url(#rough)"/><text x="1072" y="675" fill="#1b8a8f">Monitor</text></g>
+      <g filter="url(#softShadow)"><rect x="745" y="685" width="170" height="56" rx="14" fill="#fff" stroke="#0f4c81" stroke-width="3" filter="url(#rough)"/><text x="762" y="720" fill="#0f4c81">Remediate</text></g>
+      <g filter="url(#softShadow)"><rect x="520" y="640" width="160" height="56" rx="14" fill="#fff" stroke="#1b8a8f" stroke-width="3" filter="url(#rough)"/><text x="537" y="675" fill="#1b8a8f">Reassess</text></g>
+    </g>
+    <text x="700" y="660" font-size="19" fill="#0f4c81" transform="rotate(-3 700 660)">continuous, never &quot;done&quot;</text>
+  </g>
+
+  <!-- ===================== RISK DOMAIN CONSTELLATION ===================== -->
+  <!-- thin connectors from center to each domain bubble -->
+  <g stroke="#b9c6cf" stroke-width="2" fill="none" stroke-dasharray="2 8" stroke-linecap="round" opacity="0.8">
+    <path d="M300 360 q 200 160 360 250"/>
+    <path d="M250 560 q 240 60 380 80"/>
+    <path d="M300 770 q 200 -60 360 -120"/>
+    <path d="M560 940 q 160 -150 270 -240"/>
+    <path d="M1400 360 q -180 170 -300 250"/>
+    <path d="M1470 560 q -230 60 -360 80"/>
+    <path d="M1410 780 q -190 -70 -320 -150"/>
+    <path d="M1140 945 q -120 -150 -190 -250"/>
+  </g>
+
+  <!-- DOMAIN BUBBLE template: rounded card, icon dot, label + note -->
+  <!-- LEFT COLUMN -->
+  <g transform="rotate(-3 230 330)" filter="url(#softShadow)">
+    <rect x="110" y="285" width="245" height="92" rx="16" fill="#eef6fc" stroke="#0f4c81" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="142" cy="320" r="11" fill="#0f4c81"/>
+    <text x="166" y="326" font-size="25" fill="#0f4c81" font-weight="bold">Cybersecurity</text>
+    <text x="128" y="356" font-size="16" fill="#555">breaches, ransomware, access</text>
+  </g>
+  <g transform="rotate(2 230 530)" filter="url(#softShadow)">
+    <rect x="95" y="485" width="255" height="92" rx="16" fill="#eafaf6" stroke="#1b8a8f" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="127" cy="520" r="11" fill="#1b8a8f"/>
+    <text x="151" y="526" font-size="25" fill="#1b8a8f" font-weight="bold">Data Privacy</text>
+    <text x="113" y="556" font-size="16" fill="#555">PII, GDPR / CCPA, data flows</text>
+  </g>
+  <g transform="rotate(-2 230 730)" filter="url(#softShadow)">
+    <rect x="110" y="685" width="245" height="92" rx="16" fill="#fff6e6" stroke="#d18f00" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="142" cy="720" r="11" fill="#f2a900"/>
+    <text x="166" y="726" font-size="25" fill="#a86b00" font-weight="bold">Financial</text>
+    <text x="128" y="756" font-size="16" fill="#555">viability, credit, going-concern</text>
+  </g>
+  <g transform="rotate(3 320 905)" filter="url(#softShadow)">
+    <rect x="200" y="860" width="245" height="92" rx="16" fill="#eef6fc" stroke="#0f4c81" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="232" cy="895" r="11" fill="#0f4c81"/>
+    <text x="256" y="901" font-size="25" fill="#0f4c81" font-weight="bold">Operational</text>
+    <text x="218" y="931" font-size="16" fill="#555">resilience, SLAs, performance</text>
+  </g>
+
+  <!-- RIGHT COLUMN -->
+  <g transform="rotate(3 1465 330)" filter="url(#softShadow)">
+    <rect x="1345" y="285" width="255" height="92" rx="16" fill="#fdeef0" stroke="#d1495b" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="1377" cy="320" r="11" fill="#d1495b"/>
+    <text x="1401" y="326" font-size="25" fill="#b03446" font-weight="bold">Compliance</text>
+    <text x="1363" y="356" font-size="16" fill="#555">regulatory, AML, ABAC, sanctions</text>
+  </g>
+  <g transform="rotate(-2 1470 530)" filter="url(#softShadow)">
+    <rect x="1350" y="485" width="255" height="92" rx="16" fill="#fdeef0" stroke="#d1495b" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="1382" cy="520" r="11" fill="#d1495b"/>
+    <text x="1406" y="526" font-size="25" fill="#b03446" font-weight="bold">Reputational</text>
+    <text x="1368" y="556" font-size="16" fill="#555">brand, ethics, headlines</text>
+  </g>
+  <g transform="rotate(2 1465 730)" filter="url(#softShadow)">
+    <rect x="1345" y="685" width="255" height="92" rx="16" fill="#eef6fc" stroke="#0f4c81" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="1377" cy="720" r="11" fill="#0f4c81"/>
+    <text x="1401" y="726" font-size="25" fill="#0f4c81" font-weight="bold">Geopolitical</text>
+    <text x="1363" y="756" font-size="16" fill="#555">country, supply chain, conflict</text>
+  </g>
+  <g transform="rotate(-3 1375 905)" filter="url(#softShadow)">
+    <rect x="1255" y="860" width="245" height="92" rx="16" fill="#eafaf6" stroke="#1b8a8f" stroke-width="3.5" filter="url(#rough)"/>
+    <circle cx="1287" cy="895" r="11" fill="#1b8a8f"/>
+    <text x="1311" y="901" font-size="24" fill="#1b8a8f" font-weight="bold">ESG</text>
+    <text x="1273" y="931" font-size="16" fill="#555">sustainability, labor, ethics</text>
+  </g>
+
+  <!-- BOTTOM CENTER extra aspects (smaller tags) -->
+  <g font-size="19" font-weight="bold" filter="url(#softShadow)">
+    <g transform="rotate(-2 640 1015)"><rect x="540" y="990" width="200" height="50" rx="25" fill="#fff" stroke="#0f4c81" stroke-width="3" filter="url(#rough)"/><text x="560" y="1022" fill="#0f4c81">Concentration</text></g>
+    <g transform="rotate(2 880 1025)"><rect x="770" y="1000" width="220" height="50" rx="25" fill="#fff" stroke="#d1495b" stroke-width="3" filter="url(#rough)"/><text x="788" y="1032" fill="#b03446">4th / Nth-party</text></g>
+    <g transform="rotate(-1 1110 1015)"><rect x="1010" y="990" width="210" height="50" rx="25" fill="#fff" stroke="#1b8a8f" stroke-width="3" filter="url(#rough)"/><text x="1028" y="1022" fill="#1b8a8f">Business Cont.</text></g>
+  </g>
+
+  <!-- center label -->
+  <text x="720" y="170" font-size="0" fill="none">spacer</text>
+
+  <!-- ===================== ProcessUnity BRAND BAR ===================== -->
+  <g filter="url(#softShadow)">
+    <rect x="80" y="40" width="0" height="0" fill="none"/>
+  </g>
+  <g filter="url(#softShadow)">
+    <rect x="1120" y="40" width="500" height="92" rx="14" fill="#0f4c81"/>
+    <circle cx="1165" cy="86" r="9" fill="#f2a900"/>
+    <circle cx="1189" cy="70" r="9" fill="#7ed0c4"/>
+    <circle cx="1189" cy="102" r="9" fill="#7ed0c4"/>
+    <circle cx="1213" cy="86" r="9" fill="#ffffff"/>
+    <text x="1237" y="82" font-size="29" fill="#ffffff" font-weight="bold" font-family="Arial, sans-serif">ProcessUnity</text>
+    <text x="1237" y="112" font-size="16" fill="#9fd8e8" font-family="Arial, sans-serif">Third-Party Risk Management, handled.</text>
+  </g>
+
+  <!-- footer tagline -->
+  <text x="540" y="178" font-size="22" fill="#1b8a8f">Every aspect of vendor risk. One platform. One unbroken loop.</text>
+
+  <!-- corner sketch marks -->
+  <path d="M40 40 l 40 0 M40 40 l 0 40" stroke="#0f4c81" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+  <path d="M1660 1080 l -40 0 M1660 1080 l 0 -40" stroke="#0f4c81" stroke-width="4" fill="none" stroke-linecap="round" opacity="0.6"/>
+</svg>
